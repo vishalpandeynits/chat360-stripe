@@ -20,4 +20,4 @@ class CardDetailSerializer(serializers.ModelSerializer):
 class CardCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CardDetail
-        fields = ['user', 'card_number', 'expiry_date', 'action']
+        fields = ['user', 'card_number', 'expiry_date']
