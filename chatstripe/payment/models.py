@@ -1,19 +1,26 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 # Create your models here.
 
+def validate_card_expiry(value):
+    if value < timezone.now().date():
+        raise ValidationError("Value can not be of past dates")
+    return value
+
 class CardDetail(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     card_number = models.CharField(max_length = 16)
-    card_type = (
+    card_type_choices = (
         ('mastercard', _('mastercard')),
         ('visa', _('visa')),
         ('american_express', _('American Express')),
         ('discover', _('Discover'))
     )
-    card_type = models.CharField(max_length = 30)
-    expiry_date = models.DateField()
+    card_type = models.CharField(max_length = 30, choices=card_type_choices, blank=True)
+    expiry_date = models.DateField(validators=[validate_card_expiry])
     
     # will also hold an aggregrate field called status,
     # true if date < today's date else false
