@@ -5,6 +5,7 @@ Django==3.2.8
 django-rest-framework==0.1.0
 djangorestframework==3.12.4
 idna==3.3
+python-decouple==3.5
 pytz==2021.3
 requests==2.26.0
 sqlparse==0.4.2
