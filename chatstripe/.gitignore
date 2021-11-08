@@ -1,0 +1,5 @@
+.env
+__pycache__/
+stripe-env/
+migrations/
+db.sqlite3/

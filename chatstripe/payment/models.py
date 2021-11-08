@@ -4,11 +4,10 @@ from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from .stripe_payment import make_stripe_payment
 from .validators import validate_card_expiry, card_number_validator, cvv_validator, card_type_choice_validator, card_regexes
 
 class CardDetail(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     card_number = models.CharField(max_length = 16, validators = [card_number_validator])
     card_type_choices = (
         ('mastercard', _('mastercard')),
@@ -23,23 +22,21 @@ class CardDetail(models.Model):
     # will also hold an aggregrate field called status,
     # true if date < today's date else false
 
+    # initially false, true when card verified by making a payment of 
+    # 1 Rupeee(100 Paise)
+    is_verified = models.BooleanField(default = False)
     created_on = models.DateTimeField(auto_now_add = True)
     updated_on = models.DateTimeField(auto_now = True)
     
     def save(self, *args, **kwargs):
         """
-            1. Initiate a payment on every update/save method being called.
-            Save the card details iff a valid transaction is made using this
-            card.
+            # TODO
+            1. Schedule a task to 24th hour, that if this instance is not 
+            verified, delete this instance.
+            2. Encrypt the card details, not required though (In custom save method or use pre_save signal)
+            3. Define a custom manager/ method to retrive that card details
+            after decryption(if card detail is encrypted.).
         """
-        # make a payment of 1 Rupee
-        status = make_stripe_payment(card = self, amount = 1)
-
-        #TODO --> Change print statement into logger
-        if status:
-            print("Payment successful, save the card credentials")
-        else:
-            print("Payment failed, don't save the card credentials.") 
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -70,12 +67,10 @@ class Payment(models.Model):
     status = models.BooleanField(default = False)
 
     transaction_datetime = models.DateTimeField(auto_now = True)
-    #meta = models.JSONField(default = dict)
+    #meta = jsonfield.JSONField(default = dict)
 
     class Meta:
         ordering = ['-transaction_datetime']
         unique_together = ('order_id', 'transaction_id',)
         verbose_name = 'Payment Detail'
         verbose_name_plural = 'Payment Details'
-    
-
