@@ -138,6 +138,9 @@ STATICFILES_DIRS = [
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media'),
 
+# cryptography settings
+CRYPTOGRAPHY_KEY = config('CRYPTOGRAPHY_KEY')
+
 # Stripe configuration
 STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
